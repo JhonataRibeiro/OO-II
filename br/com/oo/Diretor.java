@@ -1,12 +1,9 @@
 package br.com.oo;
 
-class Gerente extends Funcionario implements Autenticavel{
+public class Diretor extends Funcionario implements Autenticavel{
+	
 	public double getBonus(){
 		return this.salario * 0.3;
-	}
-	
-	public void cobraEntrega(){
-		
 	}
 
 	@Override
@@ -14,4 +11,5 @@ class Gerente extends Funcionario implements Autenticavel{
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
 }
