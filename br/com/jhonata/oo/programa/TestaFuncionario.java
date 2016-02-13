@@ -1,4 +1,8 @@
-package br.com.oo;
+package br.com.jhonata.oo.programa;
+
+import br.com.jhonata.oo.modelo.Funcionario;
+import br.com.jhonata.oo.modelo.Gerente;
+import br.com.oo.TotalizadorDeBonus;
 
 class TestaFuncionario{
 	public static void main(String[] args) {

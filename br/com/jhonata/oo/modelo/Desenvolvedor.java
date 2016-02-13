@@ -1,4 +1,4 @@
-package br.com.oo;
+package br.com.jhonata.oo.modelo;
 
 class Desenvolvedor extends Funcionario{
 	public double getBonus(){

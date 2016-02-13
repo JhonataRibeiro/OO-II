@@ -1,0 +1,1200 @@
+Layout versão 1.0
+
+
+Para acesso ao web service, é ncessário solicitar a inclusão de um usuário com as permissões necessárias, a inclusão desse usuário deve ser solicitado a empresa que disponibiliza o web service.
+
+Para o correto funcionamento deve ser armazenado e fornecidos os cookies a cada requisição, pois o serviço é baseado em sessão de usuário.
+
+
+Padrão de Retorno de todas as requisições
+
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Autenticação bem sucedida"
+  }
+}
+
+Quando o atributo status do objeto response for igual a "ok" ocorreu tudo bem na execução do método, caso contrário ocorreu algum erro, e devem ser avaliados os atributos "messages" e "message",
+prioritariamente existira o "message" porém também poderá retornar o messages que é uma lista de problemas ou alertas de processamento.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Método
+	-   GET
+	-   host/v1.0/logoempresa
+
+	
+	Obter logotipo da empresa
+Retorno: 
+Content-Type:       image/png
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Método  
+	-   POST
+	-   host/v1.0/auth/cliente
+
+Autenticar Cliente
+
+{
+  "cliente": "166880",
+  "senha" : "123456"
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Método  
+	-   POST
+	-   host/v1.0/auth
+
+Autenticar sessão
+
+{
+  "usuario": "100002",
+  "senha" : "123456"
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Método
+	-   GET
+	-   host/v1.0/vendedores/:lastID
+
+Retorna lista com os vendedores
+
+
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "",
+    "vendedores": []
+  }
+}
+
+Na consulta deve-se informar sempre o último ID que foi lido, quando for o inicio da consulta informa-se 0
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Método  
+	-   POST
+	-   host/v1.0/pedidos
+
+Inserir pedido
+
+Dados de envio:
+
+{
+  "data": "21/11/2014",             //campo tipo alfanumérico no formato "dd/mm/yyyy"
+  "codigoCliente": 166880,          //campo numérico contendo o código do cliente
+  "formaPagamento": "001",          //campo alfanumérico contendo o código da forma de pagamento
+  "codigoVendedor": "103",          //campo alfanumérico contendo o código do vendedor
+  "observacao": "observações",      //campo alfanumérico de uso aberto
+  "especie": 1,                     //campo numérico de uso aberto 
+  "itens": [
+    {      
+      "codigoProduto": 100170,      //campo numérico contendo o código do produto
+      "qtdUnitaria": 1,             //campo numérico contendo quantidade unitária do produto
+      "qtdEmbalagem": 2,            //campo numérico contendo quantidade por embalagem
+      "valorProduto": 2.5,          //campo numérico contendo valor do produto      
+      "percDesconto": 0
+    },
+    {     
+      "codigoProduto": 100161,
+      "qtdUnitaria": 1,
+      "qtdEmbalagem": 2,
+      "valorProduto": 2.5,      
+      "percDesconto": 0
+    }
+  ]
+}
+
+
+Retorno:
+
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "",
+    "codigopedido": 7
+  }
+}
+
+
+No retorno quando o status for "ok" retornará o atributo "codigopedido", esse código deve ser armazenado para consulta futura, pois o método acima é assincrono.
+ Para consulta do processamento deve executar o método a seguir:
+
+Método
+	-   GET
+	-   /v1.0/pedidos/:codigo
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ No retorno quando o status for "ok" retornará o atributo "codigopedido", esse código deve ser armazenado para consulta futura, pois o método acima é assincrono.
+ Para consulta do processamento deve executar o método a seguir:
+
+Método
+	-   GET
+	-   host/v1.0/pedidos/{codigo}/status
+
+{
+  "response": {
+    "status": "ok",
+    "message": "Dados carregados",
+    "pedido": {
+      "dataProcessamento": "16/12/2014",
+      "horaProcessamento": "",
+      "codigo": 18,
+      "data": "16/12/2014",
+      "clie_codigo": 166880,
+      "fpgt_codigo": "001",
+      "vend_codigo": "",
+      "dataBaseVencimento": "16/12/2014",
+      "especie": 1,
+      "observacao": "observações",
+      "NumeroPedido": 0,
+      "NumeroCupom": null,
+      "CodigoPdv": null,
+      "UnidadePdv": null,
+      "erros": [],
+      "Status": "Erro"
+    }
+  }
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Retorno
+
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Dados carregados",
+    "processamento": {
+      "status": "Pendente"
+    }
+  }
+}
+
+Deve ser avaliado o atributo "status" que está contido no objeto "processamento"
+Possíveis valores para o campo status do processamento:
+
+Deve-se aguardar par os seguintes status:
+	Pendente:     Ainda não foi processado
+	Erro:         Ocorreu erro durante o processamento do pedido
+	Processando:  Ainda em processamento
+	Aguardando reprocessamento: quando um pedido teve alguma alteração e aguardo novo processamento do mesmo
+	Pedido Cancelado: Pedido Cancelado não pode ser alterado
+	Aguardando Cancelamento: Aguardando Cancelamento e removendo dependencia do pedido na base de dados
+
+Pedido efetivado:
+	Processado: Processamento concluído
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Método   
+	-   PUT
+	-   host/v1.0/pedidos/{codigo}
+
+Editar pedido
+
+Dados de envio
+
+{
+  "data": "21/11/2014",             //campo tipo alfanumérico no formato "dd/mm/yyyy"
+  "codigoCliente": 166880,          //campo numérico contendo o código do cliente
+  "formaPagamento": "001",          //campo alfanumérico contendo o código da forma de pagamento
+  "observacao": "observações",      //campo alfanumérico de uso aberto
+  "especie": 1,                     //campo numérico de uso aberto 
+  "itens": [
+    {      
+      "codigoProduto": 100170,      //campo numérico contendo o código do produto
+      "qtdUnitaria": 1,             //campo numérico contendo quantidade unitária do produto
+      "qtdEmbalagem": 2,            //campo numérico contendo quantidade por embalagem
+      "valorProduto": 2.5,          //campo numérico contendo valor do produto      
+      "percDesconto": 0.0
+    },
+    {     
+      "codigoProduto": 100161,
+      "qtdUnitaria": 1,
+      "qtdEmbalagem": 2,
+      "valorProduto": 2.5,      
+      "percDesconto": 0.1
+    }
+  ]
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ O método acima é assincrono e quando é feita qualquer alteração no pedido ele será reprocessado.
+ Para consulta do processamento deve executar o método a seguir:
+ 
+Método  
+	-   GET
+	-   host/v1.0/pedidos/{codigo}/status
+
+{codigo}  -  o parametro {codigo} deve ser substituído pelo código do pedido
+
+Retorno:
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Dados carregados",
+    "processamento": {
+      "status": "Pendente"
+    }
+  }
+}
+
+Deve ser avaliado o atributo "status" que está contido no objeto "processamento" 
+Possíveis valores para o campo status do processamento:
+
+Deve-se aguardar par os seguintes status:
+	Pendente:     Ainda não foi processado
+	Erro:         Ocorreu erro durante o processamento do pedido
+	Processando:  Ainda em processamento
+	
+Pedido efetivado:
+	Processado: Processamento concluído
+	
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Inserir novo item ao pedido
+Método
+	-   POST
+	-   host/v1.0/pedidos/{codigo}/item
+o parametro {codigo} deve ser substituído pelo código do pedido
+
+Parametro de envio:
+	
+{
+  "codigoProduto": 101729,
+  "qtdUnitaria": 100,
+  "qtdEmbalagem": 2,
+  "valorProduto": 2.5,  
+  "percDesconto": 0  
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Editar item do pedido
+Método
+	-   PUT
+	-   host/v1.0/pedidos/{codigo}/item/{codigoItem}
+
+o parametro /{codigo}/ deve ser substituído pelo código do pedido
+o parametro /{codigoItem} deve ser substituído pelo código do produto
+
+Parametro de envio:
+{
+  "codigoProduto": 101729,
+  "qtdUnitaria": 100,
+  "qtdEmbalagem": 2,
+  "valorProduto": 2.5,  
+  "percDesconto": 0  
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Excluir item do pedido
+Método
+    -  DELETE
+	-  host/v1.0/pedidos/{codigo}/item/{codigoItem}
+o parametro /{codigo}/ deve ser substituído pelo código do pedido
+o parametro /{codigoItem} deve ser substituído pelo código do produto
+
+Envio: sem parametro do tipo Json para o envio
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Listar unidades da empresa
+
+Método
+	-   GET
+	-   host/v1.0/unidades
+	
+Retorno	
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Dados carregados",
+    "unidades": [
+      {
+        "Codigo": "001",
+        "Nome": "Supermercado",
+        "RazaoSocial": "Supermercado",
+        "CNPJ": "54612654654",
+        "InscEstadual": "321654654",
+        "InscMunicipal": "21654654",
+        "Endereco": "Rua 1",
+        "Numero": "12",
+        "Complemento": "",
+        "Bairro": "",
+        "CEP": "00000000",
+        "CaixaPostal": "",
+        "Municipio": "Curitiba",
+        "UF": "PR",
+        "Fone": "415464861",
+        "Email": "email@email.com.br"
+      },
+      {
+        "Codigo": "002",
+        "Nome": "Supermercado",
+        "RazaoSocial": "Supermercado",
+        "CNPJ": "54612654654",
+        "InscEstadual": "321654654",
+        "InscMunicipal": "21654654",
+        "Endereco": "Rua 1",
+        "Numero": "12",
+        "Complemento": "",
+        "Bairro": "",
+        "CEP": "00000000",
+        "CaixaPostal": "",
+        "Municipio": "Curitiba",
+        "UF": "PR",
+        "Fone": "415464861",
+        "Email": "email@email.com.br"
+      }
+    ]
+  }
+}
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Listar dados da empresa
+   -    GET
+   -    host/v1.0/unidades{CNPJ}
+   
+   
+Retorno:
+
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Dados carregados",
+    "unidade": {
+        "Codigo": "002",
+        "Nome": "Supermercado",
+        "RazaoSocial": "Supermercado",
+        "CNPJ": "54612654654",
+        "InscEstadual": "321654654",
+        "InscMunicipal": "21654654",
+        "Endereco": "Rua 1",
+        "Numero": "12",
+        "Complemento": "",
+        "Bairro": "",
+        "CEP": "00000000",
+        "CaixaPostal": "",
+        "Municipio": "Curitiba",
+        "UF": "PR",
+        "Fone": "415464861",
+        "Email": "email@email.com.br"
+      }
+  }
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Obter dados do produto
+   -    GET
+   -    /v1.0/produtounidade/listaprodutos/:lastID/unidade/:CNPJ/departamento/:departamento
+
+ retornará os páginados - configuração no serviço
+
+o parametro :lastID é o codigo do ultimo produto que retornou na lista
+o parametro :CNPJ é o cnpj da unidade que deseja consultar o cadastro
+o parametro :departamento é o código do departamento a consultar
+
+
+Retorno:
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Dados carregados",
+	"produto": {
+        "Codigo": 102059,
+        "SKU": 102059,
+        "CodigoBarras": "7895800307823",
+        "CodigoNCM": "",
+        "Descricao": "Buballo 14.8g",
+        "Complemento": "",
+        "Marca": "Dorizon",
+        "Estoque": 0,                // Representa o estoque disponível considerando pedidos de venda, pendências de estoque, etc...
+        "Preco": 1,
+        "Grupo": "10000",
+        "Oferta": "N",
+        "DataOferta": "25-08-2015",
+        "PrecoNormal": 0,
+        "CodigoUnidade": "001",
+        "CodigoDepartamento": "999",
+        "Departamento": "Geral",
+        "Ativo": true,
+        "CodigoTributario": "905",
+        "TipoEmbalagem": "UN",
+        "QuantidadeEmbalagem": 0
+    }
+  }
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Obter dados do produto
+   -    GET
+   -    /v1.1/produtounidade/listaprodutos/:lastID/unidade/:CNPJ/departamento/:departamento
+
+ retornará os páginados - configuração no serviço
+
+o parametro :lastID é o codigo do ultimo produto que retornou na lista. Para solicitar a primeira página de informações, enviar :lastID igual a zero.
+o parametro :CNPJ é o cnpj da unidade que deseja consultar o cadastro
+o parametro :departamento é o código do departamento a consultar
+
+Obs:
+  Os campos Estoque1 até Estoque5 são os estoques de produtos que podem estar em uso, sendo o uso e o significado de cada um configuráveis para cada instalação do FlexDB.
+  Os campos FatorPr3, FatorPr4 e FatorPr5: determinam faixa de preços para os produtos de acordo com a quantidade vendida.    
+    Ex: se a quantidade menor que o FatorPr3 o preço é o Preco, se for maior que o FatorPr3 o preço do produto será o PrecoVenda3, maior que o FatorPr4 o preço do produto será o PrecoVenda4 e assim por diante.        
+  Os campos PrecoPDV3, PrecoPDV4, PrecoPDV5 seguem a mesma lógica do fator, esses preços representam o preço vigente que está no PDV.
+  O campo PrecoLista represente a lista de preços vigente para vendedores do atacado, para manter preços constantes mesmo que o preço de venda seja alterado, o campo PrecoLista é atualizado sob demanda (é necessário um comando direto de usuário no sistema FlexDB para atualizar o PrecoLista). Ainda que esse preço tenha sido projetado para uso em atacados, é prerrogativa de cada empresa utilizar esse preço em qualquer situação que considerar conveniente manter uma lista de preços fixa por um período de tempo.
+
+Retorno:
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Dados carregados",
+    "produto": {
+        "Codigo": 102059,
+        "SKU": 102059,
+        "CodigoBarras": "7895800307823",
+        "CodigoNCM": "",
+        "Descricao": "Buballo 14.8g",
+        "Complemento": "",
+        "Marca": "Dorizon",
+        "Estoque": 0,                 // Representa o estoque disponível considerando pedidos de venda, pendências de estoque, etc...
+        "Preco": 1,
+        "Grupo": "10000",
+        "Oferta": "N",
+        "DataOferta": "25-08-2015",
+        "PrecoNormal": 0,
+        "CodigoUnidade": "001",
+        "CodigoDepartamento": "999",
+        "Departamento": "Geral",
+        "Ativo": true,
+        "CodigoTributario": "905",
+        "Estoque1": 0.00,       // Estoque do produto configurável pelo cliente
+        "Estoque2": 0.00,       // Estoque do produto configurável pelo cliente
+        "Estoque3": 0.00,       // Estoque do produto configurável pelo cliente
+        "Estoque4": 0.00,       // Estoque do produto configurável pelo cliente
+        "Estoque5": 0.00,       // Estoque do produto configurável pelo cliente
+        "PrecoLista": 0.00,     // Preço da lista de preços
+        "PrecoPDV": 0.00,       // Preço de venda dos PDVs
+        "PrecoPDV3": 0.00,      // Preço de venda 3 dos PDVs
+        "PrecoPDV4": 0.00,      // Preço de venda 4 dos PDVs
+        "PrecoPDV5": 0.00,      // Preço de venda 5 dos PDVs
+        "PrecoEtiqueta": 0.00,  // Preço de venda da etiqueta
+        "PrecoCartaz": 0.00,    // Preço de venda do último cartaz impresso        
+        "PrecoVenda3": 0.00,    // Preço de venda 3 do produto
+        "PrecoVenda4": 0.00,    // Preço de venda 4 do produto
+        "PrecoVenda5": 0.00,    // Preço de venda 5 do produto
+        "FatorPr3": 0.00,       // Fator para sugestão do preço 3 do produto
+        "FatorPr4": 0.00,       // Fator para sugestão do preço 4 do produto
+        "FatorPr5": 0.00,       // Fator para sugestão do preço 5 do produto
+        "TipoEmbalagem": "KG",
+        "QuantidadeEmbalagem": 1
+    }
+  }
+}
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Obter estoque do produto para a unidade
+   -    GET
+   -    host/v1.0/produtounidade/{codigo}/unidade/{CNPJ}/estoque
+ 
+o parametro :codigo é o codigo do produto
+o parametro :CNPJ é o cnpj da unidade que deseja consultar o estoque
+   
+   
+Retorno:
+{
+  "response": {
+    "status": "ok",
+    "message": "Dados carregados",
+    "produtos": [
+      {
+        "Codigo": 102059,
+        "SKU": 102059,
+        "CodigoBarras": "7895800307823",
+        "CodigoNCM": "",
+        "Descricao": "Buballo 14.8g",
+        "Complemento": "",
+        "Marca": "Dorizon",
+        "Estoque": 0,                   // Representa o estoque disponível considerando pedidos de venda, pendências de estoque, etc...
+        "Preco": 1,
+        "Grupo": "10000",
+        "Oferta": "N",
+        "DataOferta": "25-08-2015",
+        "PrecoNormal": 0,
+        "CodigoUnidade": "001",
+        "CodigoDepartamento": "999",
+        "Departamento": "Geral",
+        "Ativo": true,
+        "CodigoTributario": "905",
+        "TipoEmbalagem": "UN",
+        "QuantidadeEmbalagem": 0
+      }
+    ]
+  }
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Obter estoque do produto para a unidade
+   -    GET
+   -    host/v1.1/produtounidade/{codigo}/unidade/{CNPJ}/estoque
+
+o parametro :codigo é o codigo do produto
+o parametro :CNPJ é o cnpj da unidade que deseja consultar o estoque
+Obs:
+  Os campos Estoque1 até Estoque5 são os estoques de produtos que podem estar em uso, sendo o uso e o significado de cada um configuráveis para cada instalação do FlexDB.
+  Os campos FatorPr3, FatorPr4 e FatorPr5: determinam faixa de preços para os produtos de acordo com a quantidade vendida.    
+    Ex: se a quantidade menor que o FatorPr3 o preço é o Preco, se for maior que o FatorPr3 o preço do produto será o PrecoVenda3, maior que o FatorPr4 o preço do produto será o PrecoVenda4 e assim por diante.        
+  Os campos PrecoPDV3, PrecoPDV4, PrecoPDV5 seguem a mesma lógica do fator, esses preços representam o preço vigente que está no PDV.
+  O campo PrecoLista represente a lista de preços vigente para vendedores do atacado, para manter preços constantes mesmo que o preço de venda seja alterado, o campo PrecoLista é atualizado sob demanda (é necessário um comando direto de usuário no sistema FlexDB para atualizar o PrecoLista). Ainda que esse preço tenha sido projetado para uso em atacados, é prerrogativa de cada empresa utilizar esse preço em qualquer situação que considerar conveniente manter uma lista de preços fixa por um período de tempo.
+
+Retorno:
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Dados carregados",
+    "produto": {
+        "Codigo": 102059,
+        "SKU": 102059,
+        "CodigoBarras": "7895800307823",
+        "CodigoNCM": "",
+        "Descricao": "Buballo 14.8g",
+        "Complemento": "",
+        "Marca": "Dorizon",
+        "Estoque": 0,                 // Representa o estoque disponível considerando pedidos de venda, pendências de estoque, etc...
+        "Preco": 1,
+        "Grupo": "10000",
+        "Oferta": "N",
+        "DataOferta": "25-08-2015",
+        "PrecoNormal": 0,
+        "CodigoUnidade": "001",
+        "CodigoDepartamento": "999",
+        "Departamento": "Geral",
+        "Ativo": true,
+        "CodigoTributario": "905",
+        "Estoque1": 0.00,       // Estoque do produto configurável pelo cliente
+        "Estoque2": 0.00,       // Estoque do produto configurável pelo cliente
+        "Estoque3": 0.00,       // Estoque do produto configurável pelo cliente
+        "Estoque4": 0.00,       // Estoque do produto configurável pelo cliente
+        "Estoque5": 0.00,       // Estoque do produto configurável pelo cliente
+        "PrecoLista": 0.00,     // Preço da lista de preços
+        "PrecoPDV": 0.00,       // Preço de venda dos PDVs
+        "PrecoPDV3": 0.00,      // Preço de venda 3 dos PDVs
+        "PrecoPDV4": 0.00,      // Preço de venda 4 dos PDVs
+        "PrecoPDV5": 0.00,      // Preço de venda 5 dos PDVs
+        "PrecoEtiqueta": 0.00,  // Preço de venda da etiqueta
+        "PrecoCartaz": 0.00,    // Preço de venda do último cartaz impresso        
+        "PrecoVenda3": 0.00,    // Preço de venda 3 do produto
+        "PrecoVenda4": 0.00,    // Preço de venda 4 do produto
+        "PrecoVenda5": 0.00,    // Preço de venda 5 do produto
+        "FatorPr3": 0.00,       // Fator para sugestão do preço 3 do produto
+        "FatorPr4": 0.00,       // Fator para sugestão do preço 4 do produto
+        "FatorPr5": 0.00,       // Fator para sugestão do preço 5 do produto
+        "TipoEmbalagem": "KG",
+        "QuantidadeEmbalagem": 1
+    }
+  }
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Obter dados do produto
+   -    GET
+   -    host/v1.0/produtounidade/{codigo}/unidade/{CNPJ}
+ 
+o parametro :codigo é o codigo do produto
+o parametro :CNPJ é o cnpj da unidade que deseja consultar
+   
+   
+Retorno:
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Dados carregados",
+    "produto": {
+      "Codigo": 102059,
+      "SKU": 102059,
+      "CodigoBarras": "7895800307823",
+      "CodigoNCM": "",
+      "Descricao": "Buballo 14.8g",
+      "Complemento": "",
+      "Marca": "Dorizon",
+      "Preco": 1,
+      "Grupo": "10000",
+      "Oferta": "N",
+      "DataOferta": "25-08-2015",
+      "PrecoNormal": 0,
+      "CodigoUnidade": "001",
+      "CodigoDepartamento": "999",
+      "Departamento": "Geral",
+      "Ativo": true,
+      "CodigoTributario": "905",
+      "TipoEmbalagem": "UN",
+      "QuantidadeEmbalagem": 0
+    }
+  }
+}
+
+Obter dados do produto
+   -    GET
+   -    host/v1.1/produtounidade/{codigo}/unidade/{CNPJ}
+
+o parametro :codigo é o codigo do produto
+o parametro :CNPJ é o cnpj da unidade que deseja consultar
+
+Obs:
+  Os campos Estoque1 até Estoque5 são os estoques de produtos que podem estar em uso, sendo o uso e o significado de cada um configuráveis para cada instalação do FlexDB.
+  Os campos FatorPr3, FatorPr4 e FatorPr5: determinam faixa de preços para os produtos de acordo com a quantidade vendida.    
+    Ex: se a quantidade menor que o FatorPr3 o preço é o Preco, se for maior que o FatorPr3 o preço do produto será o PrecoVenda3, maior que o FatorPr4 o preço do produto será o PrecoVenda4 e assim por diante.        
+  Os campos PrecoPDV3, PrecoPDV4, PrecoPDV5 seguem a mesma lógica do fator, esses preços representam o preço vigente que está no PDV.
+
+  O campo PrecoLista represente a lista de preços vigente para vendedores do atacado, para manter preços constantes mesmo que o preço de venda seja alterado, o campo PrecoLista é atualizado sob demanda (é necessário um comando direto de usuário no sistema FlexDB para atualizar o PrecoLista). Ainda que esse preço tenha sido projetado para uso em atacados, é prerrogativa de cada empresa utilizar esse preço em qualquer situação que considerar conveniente manter uma lista de preços fixa por um período de tempo.
+
+Retorno:
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Dados carregados",
+    "produto": {
+     "Codigo": 102059,
+      "SKU": 102059,
+      "CodigoBarras": "7895800307823",
+      "CodigoNCM": "",
+      "Descricao": "Buballo 14.8g",
+      "Complemento": "",
+      "Marca": "Dorizon",
+      "Preco": 1,
+      "Grupo": "10000",
+      "Oferta": "N",
+      "DataOferta": "25-08-2015",
+      "PrecoNormal": 0,
+      "CodigoUnidade": "001",
+      "CodigoDepartamento": "999",
+      "Departamento": "Geral",
+      "Ativo": true,
+      "CodigoTributario": "905",
+      "Estoque1": 0.00,       // Estoque do produto configurável pelo cliente
+      "Estoque2": 0.00,       // Estoque do produto configurável pelo cliente
+      "Estoque3": 0.00,       // Estoque do produto configurável pelo cliente
+      "Estoque4": 0.00,       // Estoque do produto configurável pelo cliente
+      "Estoque5": 0.00,       // Estoque do produto configurável pelo cliente
+      "PrecoLista": 0.00,     // Preço na lista de preços 
+      "PrecoPDV": 0.00,       // Preço de venda dos PDVs
+      "PrecoPDV3": 0.00,      // Preço de venda 3 dos PDVs
+      "PrecoPDV4": 0.00,      // Preço de venda 4 dos PDVs
+      "PrecoPDV5": 0.00,      // Preço de venda 5 dos PDVs
+      "PrecoEtiqueta": 0.00,  // Preço de venda da etiqueta
+      "PrecoCartaz": 0.00,    // Preço de venda do último cartaz      
+      "PrecoVenda3": 0.00,    // Preço de venda 3 do produto
+      "PrecoVenda4": 0.00,    // Preço de venda 4 do produto
+      "PrecoVenda5": 0.00,    // Preço de venda 5 do produto
+      "FatorPr3": 0.00,       // Fator para sugestão do preço 3 do produto
+      "FatorPr4": 0.00,       // Fator para sugestão do preço 4 do produto
+      "FatorPr5": 0.00,       // Fator para sugestão do preço 5 do produto
+      "TipoEmbalagem": "PC",
+      "QuantidadeEmbalagem": 1
+    }
+  }
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Obter cadastro de produtos
+   -    GET
+   -    host/v1.0/produtounidade/listaprodutos/{lastID}/unidade/{CNPJ}
+ 
+ retornará de 100 em 100 registros
+ 
+o parametro :lastID é o codigo do ultimo produto que retornou na lista
+o parametro :CNPJ é o cnpj da unidade que deseja consultar o cadastro
+
+Enquanto o código do ultimo produto retornado for menor que o maxCod indica que existem mais produtos a serem consultados.
+   
+   
+Retorno:
+
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Dados carregados",
+    "produtos": [
+      {
+        "Codigo": 10162,
+        "SKU": 10162,
+        "CodigoBarras": "0000040084107",
+        "CodigoNCM": "18069000",
+        "Descricao": "Kinder Ovo",
+        "Complemento": "",
+        "Marca": "Dorizon",
+        "Estoque": 0,         // Representa o estoque disponível considerando pedidos de venda, pendências de estoque, etc...
+        "Preco": 3.89,
+        "Grupo": "10000",
+        "Oferta": "N",
+        "DataOferta": "25-08-2015",
+        "PrecoNormal": 0,
+        "CodigoUnidade": "001",
+        "CodigoDepartamento": "999",
+        "Departamento": "Geral",
+        "Ativo": true,
+        "CodigoTributario": "905",
+        "TipoEmbalagem": "UN",
+        "QuantidadeEmbalagem": 0
+      }
+    ]
+  },
+  "maxCod": 792500      //Maior código de produto que consta na base de dados
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Obter cadastro de produtos
+   -    GET
+   -    host/v1.1/produtounidade/listaprodutos/{lastID}/unidade/{CNPJ}
+
+ retornará de 100 em 100 registros
+
+o parametro :lastID é o codigo do ultimo produto que retornou na lista
+o parametro :CNPJ é o cnpj da unidade que deseja consultar o cadastro
+
+Enquanto o código do ultimo produto retornado for menor que o maxCod indica que existem mais produtos a serem consultados.
+
+Obs:
+  Os campos Estoque1 até Estoque5 são os estoques de produtos que podem estar em uso, sendo o uso e o significado de cada um configuráveis para cada instalação do FlexDB.
+  Os campos FatorPr3, FatorPr4 e FatorPr5: determinam faixa de preços para os produtos de acordo com a quantidade vendida.    
+    Ex: se a quantidade menor que o FatorPr3 o preço é o Preco, se for maior que o FatorPr3 o preço do produto será o PrecoVenda3, maior que o FatorPr4 o preço do produto será o PrecoVenda4 e assim por diante.        
+  Os campos PrecoPDV3, PrecoPDV4, PrecoPDV5 seguem a mesma lógica do fator, esses preços representam o preço vigente que está no PDV.
+
+  O campo PrecoLista represente a lista de preços vigente para vendedores do atacado, para manter preços constantes mesmo que o preço de venda seja alterado, o campo PrecoLista é atualizado sob demanda (é necessário um comando direto de usuário no sistema FlexDB para atualizar o PrecoLista). Ainda que esse preço tenha sido projetado para uso em atacados, é prerrogativa de cada empresa utilizar esse preço em qualquer situação que considerar conveniente manter uma lista de preços fixa por um período de tempo.
+
+
+Retorno:
+
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Dados carregados",
+    "produtos": [      
+    	{
+        	"Codigo": 17531,
+        	"SKU": 17531,
+        	"CodigoBarras": "7891000006290",
+        	"CodigoNCM": "21011190",
+        	"Descricao": "Nescafe c Leite 330g",
+        	"Complemento": "",
+        	"Marca": "Dorizon",
+        	"Estoque": 0,           // Representa o estoque disponível considerando pedidos de venda, pendências de estoque, etc...
+        	"Preco": 9.18,
+        	"Grupo": "10000",
+        	"Oferta": "N",
+        	"DataOferta": "25-08-2015",
+        	"PrecoNormal": 0,
+        	"CodigoUnidade": "001",
+        	"CodigoDepartamento": "999",
+        	"Departamento": "Geral",
+        	"Ativo": true,
+        	"CodigoTributario": "901",
+        	"Estoque1": 0.00,       // Estoque do produto configurável pelo cliente
+        	"Estoque2": 0.00,       // Estoque do produto configurável pelo cliente
+        	"Estoque3": 0.00,       // Estoque do produto configurável pelo cliente
+        	"Estoque4": 0.00,       // Estoque do produto configurável pelo cliente
+        	"Estoque5": 0.00,       // Estoque do produto configurável pelo cliente
+        	"PrecoLista": 0.00,     // Preço da lista de preços
+        	"PrecoPDV": 0.00,       // Preço de venda dos PDVs
+        	"PrecoPDV3": 0.00,      // Preço de venda 3 dos PDVs
+        	"PrecoPDV4": 0.00,      // Preço de venda 4 dos PDVs
+        	"PrecoPDV5": 0.00,      // Preço de venda 5 dos PDVs
+        	"PrecoEtiqueta": 0.00,  // Preço de venda da etiqueta
+        	"PrecoCartaz": 0.00,    // Preço de venda do último cartaz impresso
+        	"PrecoVenda3": 0.00,    // Preço de venda 3 do produto
+        	"PrecoVenda4": 0.00,    // Preço de venda 4 do produto
+        	"PrecoVenda5": 0.00,    // Preço de venda 5 do produto
+        	"FatorPr3": 0.00,       // Fator para sugestão do preço 3 do produto
+        	"FatorPr4": 0.00,       // Fator para sugestão do preço 4 do produto
+        	"FatorPr5": 0.00,       // Fator para sugestão do preço 5 do produto
+        	"TipoEmbalagem": "KG",
+        	"QuantidadeEmbalagem": 1
+      	}
+    ]
+  },
+  "maxCod": 792500      //Maior código de produto que consta na base de dados
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Obter dados do usuario do sistema ERP
+   -    GET
+   -    host/v1.0/usuarios/{codigo}
+   
+Retorno:
+
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {"message": "erro 1"},
+	  {"message": "erro 2"}
+    ],
+    "message": "Dados carregados",
+    "usuario": {
+      "Codigo": 1,
+      "Nome": "Usuario 1",
+      "Grupo": "Administrativo - Suporte",
+      "CodigoGrupo": "001"
+    }
+  }
+}
+   
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Obter dados do cliente
+   -    GET
+   -    host/v1.0/clientes/{codigo}
+   -    host/v1.0/clientes/cpf/{cpf}
+   -    host/v1.0/clientes/email/{email}
+/v1.0/extrato/cliente/03986726101/08-07-2015/29-07-2015/24322398000493
+
+
+Retorno:
+ 
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {}
+    ],
+    "message": "Dados carregados",
+    "cliente": {
+      "codigo ": 166880,
+      "nome": "Paulo",
+      "razaoSocial": "Paulo",
+      "CnpjCpf": "211542135458",
+      "rgIe": "216354654",
+      "dtExpRG": "18/12/2014",
+      "orgExpRG": "",
+      "ufExpRG": "PR",
+      "sexo": "",
+      "dadosResidenciais": {
+        "endereco": "",
+        "numero": "",
+        "complemento": "",
+        "bairro": "",
+        "cidade": "Curitiba",
+        "uf": "PR",
+        "cep": "99999999",
+        "fone": "23135444"
+      },
+      "dadosComerciais": {
+        "endereco": "",
+        "numero": "",
+        "complemento": "",
+        "bairro": "",
+        "cidade": "Curitiba",
+        "uf": "PR",
+        "cep": "",
+        "fone": "",
+        "foneCel": ""
+      },
+      "foneCel": "",
+      "dtNasc": "05/02/1975",
+      "naturalidade": "",
+      "classe": "",
+      "email": "",
+      "emailCorr": "",
+      "endCorr": "",
+      "empresa": "",
+      "funcao": "",
+      "ramal": 0
+    }
+  }
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Inserir um novo cliente
+   -    POST
+   -    host/v1.0/clientes
+
+Parametro de envio:
+
+{
+              "nome": "Paulo Silva",
+              "sexo": "M",
+              "tipo": "F",
+              "fone": "5154654",
+              "uf": "PR",
+              "cep": "2654654",
+              "cidade": "Curitiba",
+              "endereco": "Rua 2",
+              "bairro": "",
+
+              "cpf": "15154654",
+              "rg": "5654654",
+
+              "email": "email@email.com.br"
+          }
+
+campo tipo é para identificar se é pessoa fisica ou juridica
+F - Física
+J - Jurídica
+
+caso for J deve informar "cnpj" e "ie" em vez de informar os campos "cpf" e "rg" quando for pessoa fisica
+
+
+
+Retorno:
+
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {}
+    ],
+    "message": "Cliente salvo com sucesso",
+    "cliente": {
+      "codigo": 324934
+    }
+  }
+}
+
+No retorno existirá o codigo de cliente que foi inserido
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Alterar um cliente
+   -    PUT
+   -    host/v1.0/clientes/{codigo}
+
+Parametro de envio:
+
+{
+              "nome": "Paulo Silva",
+              "sexo": "M",
+              "tipo": "J",
+              "fone": "5154654",
+              "uf": "PR",
+              "cep": "2654654",
+              "cidade": "Curitiba",
+              "endereco": "Rua 2",
+              "bairro": "",
+              "cpf": "15154654",
+              "rg": "5654654",
+              "email": "email@email.com.br"
+          }
+
+
+Retorno:
+
+{
+  "response": {
+    "status": "ok",
+    "messages": [
+      {}
+    ],
+    "message": "Cliente alterado com sucesso"
+  }
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Extrato de um cliente
+   -    GET
+   -    /v1.0/extrato/cliente/{CNPJ_CPF}/{dataInicial}/{dataFinal}/{CNPJ}
+
+   Obs: o cnpj deve ser o da matriz, e retornaré pendencias de todas as unidades da empresa
+      os campos data devem ser no padrão "dd-MM-yyyy"
+
+Retorno:
+
+{
+  "response": {
+    "status": "ok",
+    "message": "Dados carregados com sucesso",
+    "extrato": {
+      "saldoInicial": 0,
+      "movimentacoes": [
+        {
+          "transacao": "00110061276",
+          "operacao": "00110061276704",
+          "conta": "112502",
+          "descricaoConta": "Cheques Devolvidos em Cobrança",
+          "numeroDocumento": "931374",
+          "parcela": "1",
+          "data": "04/03/2010",
+          "valor": 100,
+          "saldo": -100,
+          "tipo": "DEBITO",
+          "baixaParcial": false
+        },
+        {
+          "transacao": "00110061276",
+          "operacao": "00110061276705",
+          "conta": "112502",
+          "descricaoConta": "Cheques Devolvidos em Cobrança",
+          "numeroDocumento": "931395",
+          "parcela": "1",
+          "data": "04/03/2010",
+          "valor": 56.43,
+          "saldo": -156.43,
+          "tipo": "DEBITO",
+          "baixaParcial": false
+        },
+        {
+          "transacao": "00110061276",
+          "operacao": "00110061276707",
+          "conta": "112502",
+          "descricaoConta": "Cheques Devolvidos em Cobrança",
+          "numeroDocumento": "931396",
+          "parcela": "1",
+          "data": "04/03/2010",
+          "valor": 100,
+          "saldo": -256.43,
+          "tipo": "DEBITO",
+          "baixaParcial": false
+        },
+        {
+          "transacao": "00110061276",
+          "operacao": "00110061276708",
+          "conta": "112502",
+          "descricaoConta": "Cheques Devolvidos em Cobrança",
+          "numeroDocumento": "931380",
+          "parcela": "1",
+          "data": "04/03/2010",
+          "valor": 300,
+          "saldo": -556.43,
+          "tipo": "DEBITO",
+          "baixaParcial": false
+        },
+        {
+          "transacao": "00110061276",
+          "operacao": "00110061276706",
+          "conta": "112502",
+          "descricaoConta": "Cheques Devolvidos em Cobrança",
+          "numeroDocumento": "931375",
+          "parcela": "1",
+          "data": "04/03/2010",
+          "valor": 100,
+          "saldo": -656.43,
+          "tipo": "DEBITO",
+          "baixaParcial": false
+        },
+        {
+          "transacao": "00110061276",
+          "operacao": "00110061276709",
+          "conta": "112502",
+          "descricaoConta": "Cheques Devolvidos em Cobrança",
+          "numeroDocumento": "931393",
+          "parcela": "1",
+          "data": "04/03/2010",
+          "valor": 150,
+          "saldo": -806.43,
+          "tipo": "DEBITO",
+          "baixaParcial": false
+        },
+        {
+          "transacao": "00110061276",
+          "operacao": "00110061276710",
+          "conta": "112502",
+          "descricaoConta": "Cheques Devolvidos em Cobrança",
+          "numeroDocumento": "931376",
+          "parcela": "1",
+          "data": "04/03/2010",
+          "valor": 50,
+          "saldo": -856.43,
+          "tipo": "DEBITO",
+          "baixaParcial": false
+        },
+        {
+          "transacao": "00110061276",
+          "operacao": "00110061276711",
+          "conta": "112502",
+          "descricaoConta": "Cheques Devolvidos em Cobrança",
+          "numeroDocumento": "931397",
+          "parcela": "1",
+          "data": "04/03/2010",
+          "valor": 20,
+          "saldo": -876.43,
+          "tipo": "DEBITO",
+          "baixaParcial": false
+        }
+      ],
+      "saldoFinal": -876.43
+    }
+  }
+}

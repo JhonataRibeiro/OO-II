@@ -1,5 +1,7 @@
 package br.com.oo;
 
+import br.com.jhonata.oo.modelo.Funcionario;
+
 public abstract class FuncionarioAutenticavel extends Funcionario{
 	
 	protected int senha;

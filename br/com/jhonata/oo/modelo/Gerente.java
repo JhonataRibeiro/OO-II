@@ -1,6 +1,8 @@
-package br.com.oo;
+package br.com.jhonata.oo.modelo;
 
-class Gerente extends Funcionario implements Autenticavel{
+import br.com.oo.Autenticavel;
+
+public class Gerente extends Funcionario implements Autenticavel{
 	public double getBonus(){
 		return this.salario * 0.3;
 	}

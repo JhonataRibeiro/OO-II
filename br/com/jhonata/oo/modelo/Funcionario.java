@@ -1,6 +1,6 @@
-package br.com.oo;
+package br.com.jhonata.oo.modelo;
 
-abstract class Funcionario {
+public abstract class Funcionario {
 	private String nome;
 	protected double salario;
 

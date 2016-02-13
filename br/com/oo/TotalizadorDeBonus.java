@@ -1,6 +1,8 @@
 package br.com.oo;
 
-class TotalizadorDeBonus{
+import br.com.jhonata.oo.modelo.Funcionario;
+
+public class TotalizadorDeBonus{
 	private double total;
 	
 	public void adiciona(Funcionario funcionario){

@@ -1,4 +1,6 @@
-package br.com.oo;
+package br.com.jhonata.oo.modelo;
+
+import br.com.oo.Autenticavel;
 
 public class Cliente implements Autenticavel {
 	

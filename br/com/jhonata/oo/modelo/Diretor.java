@@ -1,4 +1,6 @@
-package br.com.oo;
+package br.com.jhonata.oo.modelo;
+
+import br.com.oo.Autenticavel;
 
 public class Diretor extends Funcionario implements Autenticavel{
 	
