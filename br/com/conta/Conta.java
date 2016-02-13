@@ -6,11 +6,11 @@ public class Conta {
 	private int agencia;
 	private int numero;
 	
-	public void saca(double valor){
+	public void saca(double valor) throws Exception{
 		if(valor <	 this.saldo){
 			this.saldo -= valor;	
 		}else{
-			throw new RuntimeException("Saldo insuficiente");
+			throw new SaldoInsuficienteException(saldo);
 		}
 		
 	}
