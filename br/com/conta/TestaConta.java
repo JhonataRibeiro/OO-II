@@ -10,7 +10,7 @@ public class TestaConta {
 		}catch(SaldoInsuficienteException e){
 			System.out.println("Saldo insuficiente - " + e.getSaldoAtual());
 		}catch (Exception e) {
-			System.out.println(e.getMessage());
+			System.out.println("Um outro erro qualquer");
 		}
 		
 		

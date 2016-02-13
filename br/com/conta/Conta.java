@@ -1,5 +1,7 @@
 package br.com.conta;
 
+import javax.management.RuntimeErrorException;
+
 public class Conta {
 	private double saldo;
 	private String titular;
@@ -11,6 +13,7 @@ public class Conta {
 			this.saldo -= valor;	
 		}else{
 			throw new SaldoInsuficienteException(saldo);
+			//throw new RuntimeException();
 		}
 		
 	}
