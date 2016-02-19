@@ -2,7 +2,7 @@ package br.com.conta;
 
 public class TestaConta {
 	public static void main(String[] args) {
-		Conta joao = new Conta();
+		Conta joao = new Conta(20.0);
 		joao.deposita(50.0);
 		
 		try {
