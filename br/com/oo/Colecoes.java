@@ -15,7 +15,6 @@ public class Colecoes {
 		Set<String> nomes = new HashSet<String>();
 		nomes.add("Mauricio");
 		nomes.add("Guilherme");
-		System.out.println(nomes.get(0));
 		System.out.println(nomes.contains("Guilherme"));
 		
 		ArrayList<Conta> contas = new ArrayList<Conta>();
